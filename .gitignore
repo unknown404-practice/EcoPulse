@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+*.pyc
+*.py
+*.txt
+*.jsx
+check_syntax.js
+ecopulse-v3.html
+videoframe_*.png
