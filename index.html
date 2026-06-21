@@ -283,11 +283,21 @@
             appId: "1:17305533738:web:be6a7449eee5b1ff9df253",
             measurementId: "G-H2FMDFPMQY"
         };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        let auth = null;
+        let googleProvider = null;
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                auth = firebase.auth();
+                googleProvider = new firebase.auth.GoogleAuthProvider();
+            } else {
+                console.warn("Firebase is blocked. Running offline mode.");
+            }
+        } catch (e) {
+            console.error(e);
         }
-        const auth = firebase.auth();
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
 
         const DashboardApp = ({ user, onSignOut }) => {
             const [activeTab, setActiveTab] = useState('dashboard');
@@ -1183,6 +1193,13 @@ const ProfileView = ({ setTab, profileName, setProfileName, userName, setUserNam
             const [loading, setLoading] = useState(true);
 
             useEffect(() => {
+                if (!auth) {
+                    setTimeout(() => {
+                        setUser(null);
+                        setLoading(false);
+                    }, 50);
+                    return;
+                }
                 const unsubscribe = auth.onAuthStateChanged((u) => {
                     setUser(u);
                     setLoading(false);
@@ -1191,6 +1208,10 @@ const ProfileView = ({ setTab, profileName, setProfileName, userName, setUserNam
             }, []);
 
             const handleLogin = async () => {
+                if (!auth) {
+                    setUser({ displayName: 'Guest User', email: 'guest@local' });
+                    return;
+                }
                 try { 
                     await auth.signInWithPopup(googleProvider); 
                 } catch (e) { 
@@ -1199,7 +1220,13 @@ const ProfileView = ({ setTab, profileName, setProfileName, userName, setUserNam
                 }
             };
 
-            const handleSignOut = async () => { await auth.signOut(); };
+            const handleSignOut = async () => { 
+                if (auth) {
+                    await auth.signOut(); 
+                } else {
+                    setUser(null);
+                }
+            };
 
             if (loading) return <div style={{height:'100vh', display:'flex', alignItems:'center', justifyContent:'center'}}>Loading...</div>;
             
