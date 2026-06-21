@@ -1,6 +1,25 @@
 <!doctype html>
 <html lang="en">
 <head>
+
+<script>
+window.addEventListener('error', function(e) {
+    document.body.innerHTML += '<div style="position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:999999;word-wrap:break-word;">' +
+        '<h3>Global Error</h3><p>' + e.message + '</p><p>' + e.filename + ':' + e.lineno + '</p></div>';
+});
+window.addEventListener('unhandledrejection', function(e) {
+    document.body.innerHTML += '<div style="position:fixed;top:0;left:0;right:0;background:orange;color:white;padding:20px;z-index:999999;word-wrap:break-word;">' +
+        '<h3>Unhandled Promise Rejection</h3><p>' + (e.reason && e.reason.message ? e.reason.message : e.reason) + '</p></div>';
+});
+const oldError = console.error;
+console.error = function() {
+    oldError.apply(console, arguments);
+    const args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+    document.body.innerHTML += '<div style="position:fixed;bottom:0;left:0;right:0;background:black;color:red;padding:20px;z-index:999999;word-wrap:break-word;overflow:scroll;max-height:50vh;">' +
+        '<h3>Console Error</h3><p>' + args + '</p></div>';
+};
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoPulse | Premium Developer Dashboard</title>
